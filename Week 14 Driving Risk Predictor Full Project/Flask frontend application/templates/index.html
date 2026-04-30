@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Driving Risk Prediction System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── Reset & Variables ─────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg          : #0a0c10;
+      --surface     : #111318;
+      --surface2    : #181c24;
+      --border      : #1e2330;
+      --border2     : #252c3a;
+      --accent      : #3b82f6;
+      --accent-glow : rgba(59,130,246,0.18);
+      --low         : #22c55e;
+      --low-bg      : rgba(34,197,94,0.08);
+      --medium      : #f59e0b;
+      --medium-bg   : rgba(245,158,11,0.08);
+      --high        : #ef4444;
+      --high-bg     : rgba(239,68,68,0.08);
+      --text        : #e2e8f0;
+      --text-muted  : #64748b;
+      --text-dim    : #94a3b8;
+      --font-head   : 'Syne', sans-serif;
+      --font-body   : 'DM Sans', sans-serif;
+      --radius      : 12px;
+      --radius-sm   : 8px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Background grid ───────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Header ────────────────────────────────────────────── */
+    header {
+      position: relative;
+      z-index: 10;
+      padding: 28px 40px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(10,12,16,0.95);
+      backdrop-filter: blur(12px);
+    }
+
+    .logo-group { display: flex; align-items: center; gap: 14px; }
+
+    .logo-icon {
+      width: 42px; height: 42px;
+      background: linear-gradient(135deg, var(--accent), #6366f1);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 0 24px rgba(59,130,246,0.3);
+    }
+
+    .logo-text h1 {
+      font-family: var(--font-head);
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--text);
+    }
+
+    .logo-text p {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 400;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .header-badge {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .badge-dot {
+      width: 7px; height: 7px;
+      background: var(--low);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    /* ── Main layout ───────────────────────────────────────── */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .page-intro {
+      text-align: center;
+      margin-bottom: 44px;
+    }
+
+    .page-intro h2 {
+      font-family: var(--font-head);
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+
+    .page-intro p {
+      color: var(--text-muted);
+      font-size: 14px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* ── Form card ─────────────────────────────────────────── */
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    /* ── Section headers ───────────────────────────────────── */
+    .section-header {
+      padding: 18px 28px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-icon {
+      width: 28px; height: 28px;
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+    }
+
+    .section-header h3 {
+      font-family: var(--font-head);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* ── Field grid ────────────────────────────────────────── */
+    .fields-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      padding: 22px 28px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+    .field.half { grid-column: span 2; }
+
+    label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+
+    label span {
+      font-weight: 400;
+      color: #3b4a60;
+      font-size: 10px;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    input[type="number"],
+    input[type="text"],
+    select {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 9px 13px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="number"]:focus,
+    input[type="text"]:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    input[type="number"]::placeholder,
+    input[type="text"]::placeholder { color: #2d3748; }
+
+    select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+
+    /* Toggle buttons for binary fields */
+    .toggle-group { display: flex; gap: 6px; }
+
+    .toggle-btn {
+      flex: 1;
+      padding: 9px 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.18s;
+      text-align: center;
+    }
+
+    .toggle-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 500;
+    }
+
+    .toggle-btn:hover:not(.active) {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    /* ── Divider ───────────────────────────────────────────── */
+    .divider { border: none; border-top: 1px solid var(--border); }
+
+    /* ── Submit button ─────────────────────────────────────── */
+    .submit-row {
+      padding: 22px 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .btn-predict {
+      flex: 1;
+      max-width: 320px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, var(--accent), #6366f1);
+      border: none;
+      border-radius: var(--radius);
+      color: #fff;
+      font-family: var(--font-head);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 20px rgba(59,130,246,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-predict:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(59,130,246,0.38);
+    }
+
+    .btn-predict:active { transform: translateY(0); }
+
+    .btn-predict:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-reset {
+      padding: 14px 20px;
+      background: transparent;
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .btn-reset:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+
+    /* ── Spinner ───────────────────────────────────────────── */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Result panel ──────────────────────────────────────── */
+    #result-panel {
+      margin-top: 28px;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+      pointer-events: none;
+    }
+
+    #result-panel.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+
+    .result-card {
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .result-card.low    { border-color: rgba(34,197,94,0.3);   background: linear-gradient(135deg, rgba(34,197,94,0.06), var(--surface)); }
+    .result-card.medium { border-color: rgba(245,158,11,0.3);  background: linear-gradient(135deg, rgba(245,158,11,0.06), var(--surface)); }
+    .result-card.high   { border-color: rgba(239,68,68,0.35);  background: linear-gradient(135deg, rgba(239,68,68,0.07), var(--surface)); }
+
+    .result-header {
+      padding: 28px 32px 22px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .risk-icon {
+      font-size: 42px;
+      line-height: 1;
+      filter: drop-shadow(0 0 12px currentColor);
+    }
+
+    .risk-text h2 {
+      font-family: var(--font-head);
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.6px;
+      margin-bottom: 4px;
+    }
+
+    .risk-text h2.low    { color: var(--low); }
+    .risk-text h2.medium { color: var(--medium); }
+    .risk-text h2.high   { color: var(--high); }
+
+    .risk-text p {
+      color: var(--text-dim);
+      font-size: 13px;
+    }
+
+    .result-body {
+      padding: 0 32px 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .result-body { grid-template-columns: 1fr; }
+    }
+
+    /* Probability bars */
+    .prob-section h4 {
+      font-family: var(--font-head);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .prob-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .prob-label {
+      width: 56px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-dim);
+    }
+
+    .prob-bar-track {
+      flex: 1;
+      height: 6px;
+      background: var(--surface2);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .prob-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
+      width: 0;
+    }
+
+    .prob-bar-fill.low    { background: var(--low); }
+    .prob-bar-fill.medium { background: var(--medium); }
+    .prob-bar-fill.high   { background: var(--high); }
+
+    .prob-pct {
+      width: 38px;
+      text-align: right;
+      font-size: 12px;
+      font-family: 'DM Mono', monospace;
+      color: var(--text-dim);
+    }
+
+    /* Advice box */
+    .advice-section { display: flex; flex-direction: column; gap: 0; }
+
+    .advice-section h4 {
+      font-family: var(--font-head);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .advice-box {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .advice-box p:first-child {
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .advice-box p:last-child {
+      color: var(--text-muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    /* ── Error toast ───────────────────────────────────────── */
+    #error-toast {
+      display: none;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.25);
+      border-radius: var(--radius);
+      padding: 12px 18px;
+      color: #fca5a5;
+      font-size: 13px;
+      margin-top: 12px;
+    }
+
+    /* ── Footer ────────────────────────────────────────────── */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 11px;
+      border-top: 1px solid var(--border);
+      letter-spacing: 0.3px;
+    }
+
+    /* ── Responsive ────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      header { padding: 18px 20px; }
+      .fields-grid { padding: 16px 18px; gap: 12px; }
+      .submit-row { padding: 16px 18px; }
+      .result-header { padding: 20px 20px 16px; gap: 14px; }
+      .result-body { padding: 0 20px 20px; }
+      .page-intro h2 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────── -->
+<header>
+  <div class="logo-group">
+    <div class="logo-icon">🚗</div>
+    <div class="logo-text">
+      <h1>DriveRisk AI</h1>
+      <p>Driving Risk Prediction System</p>
+    </div>
+  </div>
+  <div class="header-badge">
+    <div class="badge-dot"></div>
+    Random Forest · Live
+  </div>
+</header>
+
+<!-- ── Main ───────────────────────────────────────────────── -->
+<main>
+  <div class="page-intro">
+    <h2>Predict Your Driving Risk</h2>
+    <p>Enter trip and vehicle details below. Our Random Forest model analyses 23 parameters to predict your risk level.</p>
+  </div>
+
+  <div class="form-card">
+
+    <!-- Section: GPS & Trip Info -->
+    <div class="section-header">
+      <div class="section-icon">📍</div>
+      <h3>GPS &amp; Trip Information</h3>
+    </div>
+    <div class="fields-grid">
+      <div class="field">
+        <label>Latitude <span>(e.g. 37.77)</span></label>
+        <input type="number" id="latitude" placeholder="37.77" step="0.0001"/>
+      </div>
+      <div class="field">
+        <label>Longitude <span>(e.g. -122.41)</span></label>
+        <input type="number" id="longitude" placeholder="-122.41" step="0.0001"/>
+      </div>
+      <div class="field">
+        <label>Trip Duration <span>(minutes)</span></label>
+        <input type="number" id="trip_duration" placeholder="30.0" min="0" step="0.1"/>
+      </div>
+      <div class="field">
+        <label>Trip Distance <span>(km)</span></label>
+        <input type="number" id="trip_distance" placeholder="15.0" min="0" step="0.1"/>
+      </div>
+      <div class="field">
+        <label>Stop Events <span>(count)</span></label>
+        <input type="number" id="stop_events" placeholder="2" min="0" step="1"/>
+      </div>
+      <div class="field">
+        <label>Heading <span>(0–360 degrees)</span></label>
+        <input type="number" id="heading" placeholder="180.0" min="0" max="360" step="0.1"/>
+      </div>
+    </div>
+
+    <hr class="divider"/>
+
+    <!-- Section: Vehicle Sensors -->
+    <div class="section-header">
+      <div class="section-icon">⚙️</div>
+      <h3>Vehicle Sensor Data</h3>
+    </div>
+    <div class="fields-grid">
+      <div class="field">
+        <label>Speed <span>(km/h)</span></label>
+        <input type="number" id="speed" placeholder="45.0" min="0" step="0.1"/>
+      </div>
+      <div class="field">
+        <label>Acceleration <span>(m/s²)</span></label>
+        <input type="number" id="acceleration" placeholder="1.5" step="0.01"/>
+      </div>
+      <div class="field">
+        <label>Steering Angle <span>(-45 to 45 deg)</span></label>
+        <input type="number" id="steering_angle" placeholder="10" min="-45" max="45" step="1"/>
+      </div>
+      <div class="field">
+        <label>RPM</label>
+        <input type="number" id="rpm" placeholder="2500" min="0" step="1"/>
+      </div>
+      <div class="field">
+        <label>Brake Usage <span>(count 0–19)</span></label>
+        <input type="number" id="brake_usage" placeholder="3" min="0" max="19" step="1"/>
+      </div>
+      <div class="field">
+        <label>Fuel Consumption <span>(L/100km)</span></label>
+        <input type="number" id="fuel_consumption" placeholder="8.5" min="0" step="0.1"/>
+      </div>
+    </div>
+
+    <hr class="divider"/>
+
+    <!-- Section: Behaviour & Route -->
+    <div class="section-header">
+      <div class="section-icon">📊</div>
+      <h3>Behaviour &amp; Route Metrics</h3>
+    </div>
+    <div class="fields-grid">
+      <div class="field">
+        <label>Lane Deviation <span>(0.0 – 1.0)</span></label>
+        <input type="number" id="lane_deviation" placeholder="0.2" min="0" max="1" step="0.01"/>
+      </div>
+      <div class="field">
+        <label>Route Deviation Score <span>(0.0 – 1.0)</span></label>
+        <input type="number" id="route_deviation_score" placeholder="0.1" min="0" max="1" step="0.01"/>
+      </div>
+      <div class="field">
+        <label>Acceleration Variation <span>(0.0 – 1.0)</span></label>
+        <input type="number" id="acceleration_variation" placeholder="0.2" min="0" max="1" step="0.01"/>
+      </div>
+      <div class="field">
+        <label>Behavioural Consistency <span>(0.0 – 1.0)</span></label>
+        <input type="number" id="behavioral_consistency_index" placeholder="0.8" min="0" max="1" step="0.01"/>
+      </div>
+    </div>
+
+    <hr class="divider"/>
+
+    <!-- Section: Environment -->
+    <div class="section-header">
+      <div class="section-icon">🌤</div>
+      <h3>Environmental Conditions</h3>
+    </div>
+    <div class="fields-grid">
+      <div class="field">
+        <label>Weather Conditions</label>
+        <select id="weather_conditions">
+          <option value="">Select weather…</option>
+          <option value="Sunny">☀️  Sunny</option>
+          <option value="Cloudy">⛅  Cloudy</option>
+          <option value="Foggy">🌫  Foggy</option>
+          <option value="Rainy">🌧  Rainy</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Road Type</label>
+        <select id="road_type">
+          <option value="">Select road type…</option>
+          <option value="Urban">🏙  Urban</option>
+          <option value="Highway">🛣  Highway</option>
+          <option value="Rural">🌾  Rural</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Traffic Condition</label>
+        <select id="traffic_condition">
+          <option value="">Select traffic…</option>
+          <option value="Light">🟢  Light</option>
+          <option value="Moderate">🟡  Moderate</option>
+          <option value="Heavy">🔴  Heavy</option>
+        </select>
+      </div>
+    </div>
+
+    <hr class="divider"/>
+
+    <!-- Section: Time -->
+    <div class="section-header">
+      <div class="section-icon">🕐</div>
+      <h3>Time Information</h3>
+    </div>
+    <div class="fields-grid">
+      <div class="field">
+        <label>Hour of Trip <span>(0 – 23)</span></label>
+        <input type="number" id="hour" placeholder="14" min="0" max="23" step="1"/>
+      </div>
+      <div class="field">
+        <label>Day of Week <span>(0=Mon … 6=Sun)</span></label>
+        <input type="number" id="day_of_week" placeholder="2" min="0" max="6" step="1"/>
+      </div>
+      <div class="field">
+        <label>Is Weekend?</label>
+        <div class="toggle-group">
+          <button class="toggle-btn" data-field="is_weekend" data-val="0" onclick="setToggle(this)">No</button>
+          <button class="toggle-btn" data-field="is_weekend" data-val="1" onclick="setToggle(this)">Yes</button>
+        </div>
+        <input type="hidden" id="is_weekend" value="0"/>
+      </div>
+      <div class="field">
+        <label>Is Night?</label>
+        <div class="toggle-group">
+          <button class="toggle-btn" data-field="is_night" data-val="0" onclick="setToggle(this)">No</button>
+          <button class="toggle-btn" data-field="is_night" data-val="1" onclick="setToggle(this)">Yes</button>
+        </div>
+        <input type="hidden" id="is_night" value="0"/>
+      </div>
+    </div>
+
+    <hr class="divider"/>
+
+    <!-- Submit row -->
+    <div class="submit-row">
+      <button class="btn-predict" id="predict-btn" onclick="predict()">
+        <span id="btn-text">🔮 Predict Risk Level</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+      <button class="btn-reset" onclick="resetForm()">Reset</button>
+    </div>
+
+  </div><!-- /form-card -->
+
+  <!-- Error toast -->
+  <div id="error-toast"></div>
+
+  <!-- Result panel -->
+  <div id="result-panel">
+    <div class="result-card" id="result-card">
+      <div class="result-header">
+        <div class="risk-icon" id="risk-icon"></div>
+        <div class="risk-text">
+          <h2 id="risk-label"></h2>
+          <p id="risk-subtitle"></p>
+        </div>
+      </div>
+      <div class="result-body">
+        <div class="prob-section">
+          <h4>Confidence Breakdown</h4>
+          <div class="prob-row">
+            <span class="prob-label">Low</span>
+            <div class="prob-bar-track"><div class="prob-bar-fill low" id="bar-low"></div></div>
+            <span class="prob-pct" id="pct-low">—</span>
+          </div>
+          <div class="prob-row">
+            <span class="prob-label">Medium</span>
+            <div class="prob-bar-track"><div class="prob-bar-fill medium" id="bar-medium"></div></div>
+            <span class="prob-pct" id="pct-medium">—</span>
+          </div>
+          <div class="prob-row">
+            <span class="prob-label">High</span>
+            <div class="prob-bar-track"><div class="prob-bar-fill high" id="bar-high"></div></div>
+            <span class="prob-pct" id="pct-high">—</span>
+          </div>
+        </div>
+        <div class="advice-section">
+          <h4>Recommendation</h4>
+          <div class="advice-box">
+            <p id="advice-short"></p>
+            <p id="advice-long"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Driving Risk Prediction System &nbsp;·&nbsp; Random Forest Model &nbsp;·&nbsp; 120,000 rows trained
+</footer>
+
+<script>
+  // ── Toggle buttons ───────────────────────────────────────────
+  function setToggle(btn) {
+    const field = btn.dataset.field;
+    document.querySelectorAll(`[data-field="${field}"]`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(field).value = btn.dataset.val;
+  }
+
+  // Set defaults: No active
+  document.querySelectorAll('.toggle-btn[data-val="0"]').forEach(b => b.classList.add('active'));
+
+  // ── Predict ──────────────────────────────────────────────────
+  async function predict() {
+    const btn     = document.getElementById('predict-btn');
+    const spinner = document.getElementById('spinner');
+    const btnText = document.getElementById('btn-text');
+    const errBox  = document.getElementById('error-toast');
+
+    errBox.style.display = 'none';
+
+    // Collect values
+    const fields = [
+      'latitude','longitude','speed','acceleration','steering_angle',
+      'heading','trip_duration','trip_distance','fuel_consumption','rpm',
+      'brake_usage','lane_deviation','weather_conditions','road_type',
+      'traffic_condition','stop_events','route_deviation_score',
+      'acceleration_variation','behavioral_consistency_index',
+      'hour','day_of_week','is_weekend','is_night'
+    ];
+
+    const payload = {};
+    for (const f of fields) {
+      const el = document.getElementById(f);
+      if (!el) continue;
+      const v = el.value.trim();
+      if (v === '' || v === null) {
+        errBox.textContent = `⚠️  Please fill in "${f.replace(/_/g,' ')}"`;
+        errBox.style.display = 'block';
+        return;
+      }
+      payload[f] = v;
+    }
+
+    // UI: loading state
+    btn.disabled = true;
+    btnText.textContent = 'Analysing…';
+    spinner.style.display = 'block';
+
+    try {
+      const res  = await fetch('/predict', {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify(payload),
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        errBox.textContent = '❌  Error: ' + data.error;
+        errBox.style.display = 'block';
+        return;
+      }
+
+      showResult(data);
+
+    } catch (e) {
+      errBox.textContent = '❌  Could not connect to the server. Make sure app.py is running.';
+      errBox.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btnText.textContent = '🔮 Predict Risk Level';
+      spinner.style.display = 'none';
+    }
+  }
+
+  // ── Show result ──────────────────────────────────────────────
+  function showResult(data) {
+    const risk    = data.risk_level;
+    const card    = document.getElementById('result-card');
+    const panel   = document.getElementById('result-panel');
+    const icons   = { Low: '🟢', Medium: '🟡', High: '🔴' };
+    const subs    = {
+      Low   : 'All parameters within safe limits',
+      Medium: 'Some parameters above normal threshold',
+      High  : 'Multiple dangerous conditions detected',
+    };
+
+    // Set classes
+    card.className = 'result-card ' + risk.toLowerCase();
+    document.getElementById('risk-icon').textContent  = icons[risk];
+    document.getElementById('risk-label').textContent = risk + ' Risk';
+    document.getElementById('risk-label').className   = risk.toLowerCase();
+    document.getElementById('risk-subtitle').textContent = subs[risk];
+
+    // Probabilities
+    const probs = data.probabilities;
+    for (const level of ['Low','Medium','High']) {
+      const pct = probs[level] || 0;
+      document.getElementById('bar-'  + level.toLowerCase()).style.width = pct + '%';
+      document.getElementById('pct-'  + level.toLowerCase()).textContent = pct + '%';
+    }
+
+    // Advice
+    document.getElementById('advice-short').textContent = data.advice_short;
+    document.getElementById('advice-long').textContent  = data.advice_long;
+
+    // Animate in
+    panel.classList.add('visible');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // ── Reset ────────────────────────────────────────────────────
+  function resetForm() {
+    document.querySelectorAll('input[type="number"], input[type="text"], select').forEach(el => {
+      el.value = el.type === 'hidden' ? '0' : '';
+    });
+    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.toggle-btn[data-val="0"]').forEach(b => b.classList.add('active'));
+    document.getElementById('result-panel').classList.remove('visible');
+    document.getElementById('error-toast').style.display = 'none';
+  }
+</script>
+</body>
+</html>
