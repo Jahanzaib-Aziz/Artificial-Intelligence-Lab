@@ -1,9 +1,4 @@
 Driving Risk Predictor Description file
-THE SUPERIOR UNIVERSITY LAHORE
-SUBMITTED BY:MUHAMMAD JAHANZAIB 
-Roll No: SU92-BSAIM-S25-047 
-Section: BS AI 3A
-Submitted to: Mr. RASIKH ALI
 
 Step 1: Data Loading
 The dataset used in this project is the Driver Behavior & Route Anomaly Dataset with Derived Features, which contains vehicle sensor readings, GPS coordinates, route information, and behavioral signals collected from real-world driving trips. The dataset comprises 120,000 records, making it a large-scale dataset suitable for training robust machine learning models.
